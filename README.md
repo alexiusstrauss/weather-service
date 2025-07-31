@@ -1,18 +1,31 @@
 # 🌤️ Weather Service API
 
-Uma API de clima robusta e escalável construída com Django e Django REST Framework, seguindo princípios de arquitetura limpa.
+<div align="center">
 
-## 📋 Funcionalidades
+**Uma API de clima robusta e escalável construída com Django e Django REST Framework**
 
-- ✅ **Consulta de clima atual** por cidade via OpenWeatherMap API
-- ✅ **Cache inteligente** com Redis (10 minutos de TTL)
-- ✅ **Histórico de consultas** (últimas 10 por cidade/IP)
-- ✅ **Rate limiting** (5 requisições/minuto por IP)
-- ✅ **Métricas e monitoramento** com Prometheus e Grafana
-- ✅ **Documentação automática** com Swagger/ReDoc
-- ✅ **Arquitetura limpa** com separação de responsabilidades
-- ✅ **Testes abrangentes** (unitários, integração e BDD)
-- ✅ **Docker** para desenvolvimento e produção
+*Seguindo princípios de Clean Architecture e boas práticas de desenvolvimento*
+
+[![Python](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://python.org)
+[![Django](https://img.shields.io/badge/Django-4.2+-green.svg)](https://djangoproject.com)
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://docker.com)
+[![Tests](https://img.shields.io/badge/Tests-67%25_Coverage-green.svg)](#-testes)
+
+</div>
+
+---
+
+## ✨ Funcionalidades
+
+🌍 **Consulta de clima atual** por cidade via OpenWeatherMap API  
+⚡ **Cache inteligente** com Redis (10 minutos de TTL)  
+📊 **Histórico de consultas** (últimas 10 por cidade)  
+🛡️ **Rate limiting** (5 requisições/minuto por IP)  
+📈 **Métricas e monitoramento** com Prometheus e Grafana  
+📚 **Documentação automática** com Swagger/ReDoc  
+🏗️ **Arquitetura limpa** com separação de responsabilidades  
+🧪 **Testes abrangentes** (unitários, integração e BDD)  
+🐳 **Docker** para desenvolvimento e produção
 
 ## 🏗️ Arquitetura
 
@@ -41,14 +54,14 @@ weather_service/
 
 ## 🚀 Instalação e Configuração
 
-### Pré-requisitos
+### 📋 Pré-requisitos
 
-- Python 3.11+
-- Poetry
-- Docker e Docker Compose (opcional)
-- Conta na OpenWeatherMap API
+- **Python 3.12+** (recomendamos usar [pyenv](https://github.com/pyenv/pyenv))
+- **Poetry** para gerenciamento de dependências
+- **Docker e Docker Compose** (para execução completa)
+- **Conta na OpenWeatherMap API** (opcional - usa mock por padrão)
 
-### 1. Instalação Local com Poetry
+### 🔧 Configuração Local (Desenvolvimento)
 
 ```bash
 # Clone o repositório
@@ -58,105 +71,119 @@ cd weather-service
 # Crie o ambiente virtual e instale dependências
 make create-env
 
-# Copie e configure as variáveis de ambiente
+# Configure variáveis de ambiente (opcional)
 cp .env.example .env
 # Edite o arquivo .env com suas configurações
 
-# Execute as migrações
+# Execute migrações e inicie o servidor
 poetry run python manage.py migrate
-
-# Crie um superusuário (opcional)
-poetry run python manage.py createsuperuser
-
-# Execute o servidor de desenvolvimento
-make run
+poetry run python manage.py runserver
 ```
 
-### 2. Instalação com Docker
+### 🐳 Execução Completa (Docker)
 
 ```bash
 # Clone o repositório
 git clone <repository-url>
 cd weather-service
 
-# Copie e configure as variáveis de ambiente
-cp .env.example .env
-# Edite o arquivo .env com suas configurações
-
-# Execute toda a stack
-make run-metrics
+# Execute toda a stack (PostgreSQL, Redis, API, Celery, Grafana, Prometheus)
+make run
 ```
 
-## 🔧 Comandos do Makefile
+> **💡 Recomendação:** Use `make create-env` para desenvolvimento local ou `make run` para execução completa com Docker.
+
+## 🔧 Comandos Disponíveis
 
 | Comando | Descrição |
-|---------|-----------|
-| `make create-env` | Cria ambiente virtual e instala dependências |
-| `make run` | Executa servidor de desenvolvimento |
-| `make test` | Executa testes unitários e de integração |
-| `make bdd` | Executa testes BDD com behave |
-| `make lint` | Executa linting (ruff, pylint) |
-| `make format` | Formata código (black, isort) |
-| `make monitor` | Inicia stack de monitoramento |
-| `make run-metrics` | Inicia stack completa com métricas |
-| `make docker-build` | Constrói imagens Docker |
-| `make docker-up` | Inicia todos os serviços |
-| `make docker-down` | Para todos os serviços |
+|---------|----------|
+| `make help` | Mostra todos os comandos disponíveis |
+| `make create-env` | Cria ambiente virtual com Python e instala dependências |
+| `make build` | Constrói imagens Docker |
+| `make devstack` | Inicia stack de desenvolvimento (PostgreSQL, Redis, Grafana, Prometheus) |
+| `make run-dev` | Executa API localmente (sem Celery) |
+| `make run-worker` | Executa Celery worker e beat scheduler |
+| `make run` | **Executa stack completa** (devstack + API + Celery) |
+| `make test` | Executa testes unitários |
+| `make test-bdd` | Executa testes BDD apenas |
+| `make test-bdd-quiet` | Executa testes BDD com saída mínima |
+| `make test-bdd-verbose` | Executa testes BDD com nomes dos cenários |
+| `make test-all` | **Executa todos os testes** (unitários + integração + BDD) |
+| `make format` | Formata código (black, isort, ruff) |
+| `make stop` | Para todos os serviços |
+| `make clean` | Limpa arquivos temporários e cache |
 
-## 🧪 Executando Testes
+## 🧪 Testes
 
-### Testes Unitários e de Integração
+### 📈 Cobertura de Testes
+
+- **40 testes unitários/integração** ✅
+- **7 cenários BDD** ✅  
+- **Cobertura total: 72%** ✅
+
+### 🚀 Executando Testes
 
 ```bash
-# Todos os testes
-make test
+# Todos os testes (unitários + integração + BDD)
+make test-all
 
 # Apenas testes unitários
-make test-unit
+make test
 
-# Apenas testes de integração
-make test-integration
+# Apenas testes BDD
+make test-bdd
 
-# Com relatório de cobertura
-make test-coverage
+# Testes BDD com saída detalhada
+make test-bdd-verbose
+
+# Testes BDD com saída mínima
+make test-bdd-quiet
 ```
 
-### Testes BDD (Behavior Driven Development)
+### 📋 Estrutura de Testes
 
-```bash
-# Executar testes BDD
-make bdd
+- **🧪 Unit Tests**: Testam componentes isolados (services, repositories, use cases)
+- **🔗 Integration Tests**: Testam fluxos completos da API
+- **🎭 BDD Tests**: Testam cenários de negócio em linguagem natural
 
-# Ou diretamente
-poetry run python manage.py behave
-```
+### 📊 Cenários BDD Implementados
 
-### Estrutura de Testes
+1. ✅ Consulta de clima para cidade válida
+2. ✅ Consulta de clima para cidade inválida  
+3. ✅ Requisição sem parâmetro de cidade
+4. ✅ Dados de clima em cache
+5. ✅ Histórico de consultas salvo
+6. ✅ Rate limiting bloqueia requisições excessivas
+7. ✅ Invalidação de cache funciona
 
-- **Unit Tests**: Testam componentes isolados (services, repositories, use cases)
-- **Integration Tests**: Testam fluxos completos da API
-- **BDD Tests**: Testam cenários de negócio em linguagem natural
+## 📈 Monitoramento e Métricas
 
-## 📊 Monitoramento e Métricas
+### 📉 Painel do Grafana
 
-### Grafana Dashboard
+**Acesse o dashboard completo em:** http://localhost:3000  
+- **Usuário**: `admin`
+- **Senha**: `admin`
 
-Acesse o dashboard em: http://localhost:3000
-- **Usuário**: admin
-- **Senha**: admin
+📈 **Visualizações disponíveis:**
+- Gráficos de requisições por endpoint
+- Métricas de performance e latencia
+- Monitoramento de cache hits/misses
+- Análise de rate limiting
+- Status dos serviços em tempo real
 
-### Métricas Disponíveis
+### 📁 Métricas Coletadas
 
-- Número de requisições HTTP
-- Tempo de resposta das APIs
-- Cache hits/misses
-- Rate limiting blocks
-- Requisições para APIs externas
+- 🚀 **Número de requisições HTTP** por endpoint
+- ⏱️ **Tempo de resposta** das APIs
+- 💾 **Cache hits/misses** do Redis
+- 🛡️ **Rate limiting blocks** por IP
+- 🌍 **Requisições para APIs externas** (OpenWeatherMap)
+- 📊 **Métricas de sistema** (CPU, memória, disco)
 
-### Prometheus
+### 🔍 Prometheus
 
-Métricas expostas em: http://localhost:9090
-- Endpoint de métricas: http://localhost:8000/metrics
+**Métricas expostas em:** http://localhost:9090  
+**Endpoint de métricas:** http://localhost:8000/metrics
 
 ## 🔗 Endpoints da API
 
@@ -248,9 +275,6 @@ poetry run celery -A weather_service beat -l info
 ### Linting e Formatação
 
 ```bash
-# Verificar código
-make lint
-
 # Formatar código
 make format
 ```
@@ -278,62 +302,119 @@ make format
 - **Storage**: Redis
 - **Exceções**: Health check e métricas
 
+## 📁 Organização do Projeto
+
+```
+weather-service/
+├── weather_service/          # Código principal da aplicação
+│   ├── apps/                # Apps Django
+│   │   ├── core/           # App core (middleware, health checks)
+│   │   └── weather/        # App weather (models, views, services)
+│   └── settings/           # Configurações por ambiente
+├── tests/                   # Testes organizados por tipo
+│   ├── unit/               # Testes unitários
+│   ├── integration/        # Testes de integração
+│   └── features/           # Testes BDD (Behave)
+├── docker/                  # Configurações Docker
+├── docs/                    # Documentação adicional
+└── static/                  # Arquivos estáticos
+```
+
+### 🏗️ Arquitetura Clean Code
+
+- **📊 Models**: Entidades de domínio (Django ORM)
+- **🔄 Repositories**: Camada de acesso a dados
+- **⚙️ Services**: Lógica de integração externa
+- **🎯 Use Cases**: Regras de negócio
+- **🌐 Views**: Camada de apresentação (API)
+- **🧪 Tests**: Testes isolados e independentes
+
 ## 🚀 Deploy em Produção
 
 ### Usando Docker
 
 ```bash
 # Build das imagens
-make docker-build
+make build
 
 # Deploy completo
-make run-metrics
+make run
 ```
 
-### Configurações de Produção
+## 🖼️ Capturas de Tela
 
-1. Configure `SECRET_KEY` segura
-2. Defina `DEBUG=False`
-3. Configure `ALLOWED_HOSTS`
-4. Use banco PostgreSQL
-5. Configure SSL/HTTPS
-6. Configure logs centralizados
+### 📚 Documentação da API (Swagger)
+![Swagger UI](docs/evidencias/swagger.png)
+*Interface interativa da API com todos os endpoints documentados*
 
-## 🤝 Contribuindo
+### 🧪 Execução dos Testes
+![Testes Unitários](docs/evidencias/Make%20test.png)
+*Execução dos 40 testes unitários e de integração com 72% de cobertura*
 
-1. Fork o projeto
-2. Crie uma branch para sua feature
-3. Faça commit das mudanças
-4. Execute os testes: `make test`
-5. Execute o linting: `make lint`
-6. Abra um Pull Request
+![Testes BDD](docs/evidencias/Make%20BDD.png)
+*Execução dos 7 cenários BDD com 100% de sucesso*
 
-## 📝 Histórias de Usuário
+![Cenários BDD](docs/evidencias/Cenarios%20BDD.png)
+*Detalhamento dos cenários BDD implementados*
 
-O projeto implementa as seguintes histórias:
+### 📊 Monitoramento e Métricas
+![Dashboard Grafana](docs/evidencias/Dashboard%20Grafana.png)
+*Painel principal do Grafana com métricas de performance*
 
-1. ✅ **Consultar clima atual** por cidade
-2. ✅ **Cache de 10 minutos** para performance
-3. ✅ **Histórico das últimas 10 consultas**
-4. ✅ **Rate limiting** (5 req/min por IP)
-5. ✅ **Estrutura profissional** com arquitetura limpa
-6. ✅ **Métricas e observabilidade**
-7. ✅ **Docker e orquestração**
-8. ✅ **Documentação completa**
+![Gráfico por Cidade](docs/evidencias/Grafico%20Request%20by%20City.png)
+*Métricas detalhadas de requisições por cidade*
 
-## 📄 Licença
+### 🔧 Comandos e Deploy
+![Make Help](docs/evidencias/Make%20help.png)
+*Lista completa de comandos disponíveis no Makefile*
 
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+![Make Run](docs/evidencias/make-run.png)
+*Deploy completo da stack com Docker Compose*
 
-## 🆘 Suporte
+## 📝 Histórias de Usuário Implementadas
 
-Para dúvidas ou problemas:
+✅ **US1:** Consultar clima atual por cidade  
+✅ **US2:** Cache inteligente de 10 minutos para performance  
+✅ **US3:** Histórico das últimas 10 consultas por cidade  
+✅ **US4:** Rate limiting (5 requisições/minuto por IP)  
+✅ **US5:** Estrutura profissional com Clean Architecture  
+✅ **US6:** Métricas e observabilidade com Grafana/Prometheus  
+✅ **US7:** Docker e orquestração de serviços  
+✅ **US8:** Documentação completa e testes abrangentes
 
-1. Verifique a documentação da API em `/api/docs/`
-2. Consulte os logs da aplicação
-3. Verifique o health check em `/health/`
-4. Abra uma issue no repositório
+## 📞 Endpoints Principais
+
+| Endpoint | Método | Descrição |
+|----------|---------|------------|
+| `/api/v1/weather/` | GET | Consulta clima por cidade |
+| `/api/v1/weather/history/` | GET | Histórico de consultas |
+| `/api/v1/weather/cache/` | DELETE | Invalida cache (admin) |
+| `/health/` | GET | Health check dos serviços |
+| `/api/docs/` | GET | Documentação Swagger |
+| `/metrics` | GET | Métricas Prometheus |
+
+## 🆘 Suporte e Troubleshooting
+
+📆 **Documentação da API:** http://localhost:8000/api/docs/  
+🔍 **Health Check:** http://localhost:8000/health/  
+📈 **Métricas:** http://localhost:8000/metrics  
+📉 **Grafana:** http://localhost:3000 (admin/admin)
 
 ---
 
-**Desenvolvido com ❤️ usando Django, DRF e Clean Architecture**
+<div align="center">
+
+## 📄 Licença
+
+**Distribuído sob termos não comerciais** com base na GNU GPL  
+*Uso exclusivo para testes técnicos e estudos*
+
+Consulte o arquivo [LICENSE](./LICENSE) para detalhes completos
+
+---
+
+**Desenvolvido com ❤️ usando Django, Clean Architecture e boas práticas**
+
+*Weather Service API - 2025*
+
+</div>
