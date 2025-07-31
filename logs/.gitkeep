@@ -1,0 +1,2 @@
+# This file ensures the logs directory is created in git
+# Django will create log files here

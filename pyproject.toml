@@ -1,0 +1,116 @@
+[tool.poetry]
+name = "weather-service"
+version = "0.1.0"
+description = "API de clima com arquitetura limpa usando Django e DRF"
+authors = ["Weather Service Team <team@weatherservice.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+Django = "^4.2.0"
+djangorestframework = "^3.14.0"
+django-prometheus = "^2.3.1"
+drf-spectacular = "^0.26.0"
+python-decouple = "^3.8"
+redis = "^4.5.0"
+celery = "^5.3.0"
+psycopg2-binary = "^2.9.0"
+loguru = "^0.7.0"
+requests = "^2.31.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.0"
+pytest-django = "^4.5.0"
+pytest-cov = "^4.1.0"
+behave = "^1.2.6"
+behave-django = "^1.4.0"
+ruff = "^0.0.280"
+pylint = "^2.17.0"
+black = "^23.7.0"
+isort = "^5.12.0"
+factory-boy = "^3.3.0"
+freezegun = "^1.2.0"
+django-extensions = "^3.2.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 120
+target-version = ['py312']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 120
+known_django = "django"
+sections = ["FUTURE", "STDLIB", "DJANGO", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "UP", # pyupgrade
+]
+ignore = [
+    "E501",  # line too long, handled by black
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
+    "E402",  # module level import not at top of file
+    "F401",  # imported but unused
+    "B904",  # within an `except` clause, raise exceptions with `raise ... from err` or `raise ...
+    "F403",  # `from . import *` used; unable to detect undefined names
+    "F405",  # `config` may be undefined, or defined from star imports
+    "E402",  # module level import not at top of file
+
+]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "weather_service.settings.test"
+python_files = ["tests.py", "test_*.py", "*_tests.py"]
+addopts = "--cov=weather_service --cov-report=term --cov-report=html"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["weather_service"]
+omit = [
+    "*/migrations/*",
+    "behave.py",
+    "admin.py",
+    "__init__.py",
+    "*/venv/*",
+    "*/env/*",
+    "manage.py",
+    "weather_service/settings/*",
+    "weather_service/wsgi.py",
+    "weather_service/asgi.py",
+]
+
+[tool.coverage.report]
+show_missing = false
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+]
