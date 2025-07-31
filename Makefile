@@ -1,4 +1,4 @@
-.PHONY: help create-env install clean devstack run run-dev run-worker test test-all lint format
+.PHONY: help create-env install clean devstack run run-dev run-worker init-grafana test test-all lint format
 
 # Colors
 BLUE := \033[36m
@@ -157,6 +157,23 @@ run: build ## Run complete stack (devstack + API + Celery)
 	@echo "$(BLUE)   Grafana:$(RESET)         http://localhost:3000/ (admin/admin)"
 	@echo "$(BLUE)   Prometheus:$(RESET)      http://localhost:9090/"
 	@echo ""
+	@echo "$(YELLOW)💡 Tip: Run 'make init-grafana' to populate dashboards with sample data$(RESET)"
+	@echo ""
+
+init-grafana: ## Initialize Grafana dashboards with sample data
+	@echo "$(BLUE)Initializing Grafana with sample data...$(RESET)"
+	@echo "$(YELLOW)⏳ Checking if services are running...$(RESET)"
+	@if ! curl -s http://localhost:8000/health/ >/dev/null 2>&1; then \
+		echo "$(RED)❌ API is not running. Please run 'make run' first.$(RESET)"; \
+		echo "$(YELLOW)Services needed: API (8000), Grafana (3000), Prometheus (9090)$(RESET)"; \
+		exit 1; \
+	fi
+	@if ! curl -s http://localhost:3000/api/health >/dev/null 2>&1; then \
+		echo "$(RED)❌ Grafana is not running. Please run 'make run' first.$(RESET)"; \
+		exit 1; \
+	fi
+	@echo "$(GREEN)✅ Services are running. Proceeding with initialization...$(RESET)"
+	@./scripts/init-grafana.sh
 
 test: ## Run pytest tests
 	@echo "$(BLUE)Running pytest tests...$(RESET)"

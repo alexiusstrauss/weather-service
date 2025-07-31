@@ -20,7 +20,6 @@
   "graphTooltip": 0,
   "id": null,
   "links": [],
-  "liveNow": false,
   "panels": [
     {
       "datasource": {
@@ -30,7 +29,37 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "thresholds"
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            },
+            "barWidth": 0.97,
+            "barRadius": 0.1
           },
           "mappings": [],
           "thresholds": {
@@ -48,7 +77,20 @@
           },
           "unit": "short"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Time"
+            },
+            "properties": [
+              {
+                "id": "custom.axisLabel",
+                "value": "small"
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -58,30 +100,27 @@
       },
       "id": 1,
       "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
         },
-        "textMode": "auto"
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
       },
       "pluginVersion": "8.5.0",
       "targets": [
         {
-          "expr": "sum(django_http_requests_before_middlewares_total)",
+          "expr": "sum(rate(django_http_requests_before_middlewares_total{path!=\"/health/\"}[10m])) * 600",
           "interval": "",
-          "legendFormat": "Total HTTP Requests",
+          "legendFormat": "Requests/10min",
           "refId": "A"
         }
       ],
-      "title": "Total HTTP Requests",
-      "type": "stat"
+      "title": "Media requests a cada 10 minutos",
+      "type": "timeseries"
     },
     {
       "datasource": {
@@ -358,8 +397,8 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 10,
+            "drawStyle": "bars",
+            "fillOpacity": 80,
             "gradientMode": "none",
             "hideFrom": {
               "legend": false,
@@ -420,13 +459,13 @@
       },
       "targets": [
         {
-          "expr": "weather_service_requests_total",
+          "expr": "sum(increase(weather_service_requests_total[5m])) by (city, cached)",
           "interval": "",
-          "legendFormat": "{{city}} (cached: {{cached}})",
+          "legendFormat": "{{city}} (cached: {{cached}}) - 5min",
           "refId": "A"
         }
       ],
-      "title": "Weather Service Requests by City",
+      "title": "Weather Service Requests by City (5min intervals)",
       "type": "timeseries"
     },
     {
@@ -868,6 +907,7 @@
     }
   ],
   "refresh": "5s",
+  "liveNow": true,
   "schemaVersion": 36,
   "style": "dark",
   "tags": [
@@ -879,7 +919,7 @@
     "list": []
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-30m",
     "to": "now"
   },
   "timepicker": {},
