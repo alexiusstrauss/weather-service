@@ -163,10 +163,9 @@ run: build ## Run complete stack (devstack + API + Celery)
 	@echo "$(BLUE)   Prometheus:$(RESET)      http://localhost:9090/"
 	@echo ""
 
-test: ## Run unit tests
-	@echo "$(BLUE)Running unit tests...$(RESET)"
-	@poetry run pytest tests/unit/ -v --cov=weather_service --cov-report=term
-
+test: ## Run pytest tests
+	@echo "$(BLUE)Running pytest tests...$(RESET)"
+	@poetry run pytest tests/ -vv --cov=weather_service --cov-report=term
 test-bdd: ## Run BDD tests only
 	@echo "$(BLUE)Running BDD tests...$(RESET)"
 	@DJANGO_SETTINGS_MODULE=weather_service.settings.test DJANGO_LOG_LEVEL=WARNING poetry run python manage.py behave --format progress
@@ -181,7 +180,7 @@ test-bdd-verbose: ## Run BDD tests showing scenario names
 
 test-all: ## Run all tests (unit, integration, BDD)
 	@echo "$(BLUE)Running all tests...$(RESET)"
-	@poetry run pytest tests/unit/ tests/integration/ -v --cov=weather_service --cov-report=term
+	@poetry run pytest tests/ -vv --cov=weather_service --cov-report=term
 	@DJANGO_SETTINGS_MODULE=weather_service.settings.test poetry run python manage.py behave
 
 format: ## Format code
