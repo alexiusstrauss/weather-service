@@ -20,37 +20,71 @@ help: ## Show available commands
 
 create-env: ## Create virtual environment with Python version from pyproject.toml
 	@echo "$(BLUE)Setting up development environment...$(RESET)"
-	@# Check prerequisites
-	@if ! command -v pyenv >/dev/null 2>&1; then \
+	@# Check if pyenv is available
+	@which pyenv >/dev/null 2>&1 || { \
 		echo "$(RED)❌ pyenv not found. Please install pyenv first:$(RESET)"; \
-		echo "$(YELLOW)  brew install pyenv$(RESET)"; \
+		echo "$(YELLOW)  macOS: brew install pyenv$(RESET)"; \
+		echo "$(YELLOW)  Linux: curl https://pyenv.run | bash$(RESET)"; \
 		exit 1; \
-	fi
-	@if ! command -v poetry >/dev/null 2>&1; then \
+	}
+	@# Check if poetry is available
+	@which poetry >/dev/null 2>&1 || { \
 		echo "$(RED)❌ poetry not found. Please install poetry first:$(RESET)"; \
 		echo "$(YELLOW)  curl -sSL https://install.python-poetry.org | python3 -$(RESET)"; \
 		exit 1; \
-	fi
+	}
+	@# Extract and validate Python version
 	@echo "$(BLUE)📋 Extracting Python version from pyproject.toml...$(RESET)"
-	@PYTHON_VERSION=$$(grep '^python = ' pyproject.toml | cut -d'"' -f2 | sed 's/\^//'); \
+	@if [ ! -f pyproject.toml ]; then \
+		echo "$(RED)❌ pyproject.toml not found$(RESET)"; \
+		exit 1; \
+	fi
+	@PYTHON_VERSION=$$(grep '^python = ' pyproject.toml | head -1 | cut -d'"' -f2 | sed 's/[\^~]//g' | sed 's/>=//g'); \
+	if [ -z "$$PYTHON_VERSION" ]; then \
+		echo "$(RED)❌ Could not extract Python version from pyproject.toml$(RESET)"; \
+		exit 1; \
+	fi; \
 	echo "$(BLUE)📋 Required Python: $$PYTHON_VERSION$(RESET)"
-	@if ! pyenv versions --bare | grep -q "^$$PYTHON_VERSION" >/dev/null 2>&1; then \
+	@# Check and install Python version
+	@PYTHON_VERSION=$$(grep '^python = ' pyproject.toml | head -1 | cut -d'"' -f2 | sed 's/[\^~]//g' | sed 's/>=//g'); \
+	if ! pyenv versions --bare 2>/dev/null | grep -q "^$$PYTHON_VERSION"; then \
 		echo "$(YELLOW)📥 Installing Python $$PYTHON_VERSION...$(RESET)"; \
-		LATEST_VERSION=$$(pyenv install --list | grep -E "^\s*$$PYTHON_VERSION\.[0-9]+$$" | tail -1 | xargs); \
+		LATEST_VERSION=$$(pyenv install --list 2>/dev/null | grep -E "^\s*$$PYTHON_VERSION\.[0-9]+$$" | tail -1 | tr -d ' '); \
 		if [ -z "$$LATEST_VERSION" ]; then \
-			echo "$(RED)❌ Python $$PYTHON_VERSION not available$(RESET)"; \
+			echo "$(RED)❌ Python $$PYTHON_VERSION not available for installation$(RESET)"; \
+			echo "$(YELLOW)Available versions:$(RESET)"; \
+			pyenv install --list | grep "$$PYTHON_VERSION" | head -5; \
 			exit 1; \
 		fi; \
-		pyenv install $$LATEST_VERSION >/dev/null 2>&1; \
+		echo "$(BLUE)Installing Python $$LATEST_VERSION...$(RESET)"; \
+		pyenv install $$LATEST_VERSION || { \
+			echo "$(RED)❌ Failed to install Python $$LATEST_VERSION$(RESET)"; \
+			exit 1; \
+		}; \
 		PYTHON_VERSION=$$LATEST_VERSION; \
 	else \
-		PYTHON_VERSION=$$(pyenv versions --bare | grep "^$$PYTHON_VERSION" | sort -V | tail -1); \
+		PYTHON_VERSION=$$(pyenv versions --bare 2>/dev/null | grep "^$$PYTHON_VERSION" | sort -V | tail -1); \
 	fi; \
 	echo "$(GREEN)✅ Using Python: $$PYTHON_VERSION$(RESET)"
-	@pyenv local $$PYTHON_VERSION >/dev/null 2>&1
-	@poetry env use $$(pyenv which python) >/dev/null 2>&1
+	@# Configure environment
+	@PYTHON_VERSION=$$(grep '^python = ' pyproject.toml | head -1 | cut -d'"' -f2 | sed 's/[\^~]//g' | sed 's/>=//g'); \
+	if ! pyenv versions --bare 2>/dev/null | grep -q "^$$PYTHON_VERSION"; then \
+		PYTHON_VERSION=$$(pyenv versions --bare 2>/dev/null | grep "^$$PYTHON_VERSION" | sort -V | tail -1); \
+	fi; \
+	echo "$(BLUE)🔧 Configuring environment...$(RESET)"; \
+	pyenv local $$PYTHON_VERSION 2>/dev/null || { \
+		echo "$(RED)❌ Failed to set local Python version$(RESET)"; \
+		exit 1; \
+	}; \
+	poetry env use $$(pyenv which python 2>/dev/null) >/dev/null 2>&1 || { \
+		echo "$(RED)❌ Failed to configure poetry environment$(RESET)"; \
+		exit 1; \
+	}
 	@echo "$(BLUE)📦 Installing dependencies...$(RESET)"
-	@poetry install --no-root >/dev/null 2>&1
+	@poetry install --no-root >/dev/null 2>&1 || { \
+		echo "$(RED)❌ Failed to install dependencies$(RESET)"; \
+		exit 1; \
+	}
 	@echo "$(GREEN)🎉 Environment ready!$(RESET)"
 	@echo "$(YELLOW)💡 Activate with: poetry shell$(RESET)"
 
