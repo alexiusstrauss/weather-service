@@ -2,7 +2,7 @@
 name = "weather-service"
 version = "0.1.0"
 description = "API de clima com arquitetura limpa usando Django e DRF"
-authors = ["Weather Service Team <team@weatherservice.com>"]
+authors = ["Alexius Strauss <alexius.dev@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
