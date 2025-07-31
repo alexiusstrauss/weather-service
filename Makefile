@@ -19,80 +19,41 @@ help: ## Show available commands
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "$(GREEN)%-15s$(RESET) %s\n", $$1, $$2}'
 
 create-env: ## Create virtual environment with Python version from pyproject.toml
-	@echo "$(BLUE)Creating virtual environment...$(RESET)"
-	@# Check if pyenv is installed
-	@if ! command -v pyenv &> /dev/null; then \
-		echo "$(RED)pyenv not found. Please install pyenv first.$(RESET)"; \
+	@echo "$(BLUE)Setting up development environment...$(RESET)"
+	@# Check prerequisites
+	@if ! command -v pyenv >/dev/null 2>&1; then \
+		echo "$(RED)❌ pyenv not found. Please install pyenv first:$(RESET)"; \
+		echo "$(YELLOW)  brew install pyenv$(RESET)"; \
 		exit 1; \
 	fi
-	@# Check if poetry is installed
-	@if ! command -v poetry &> /dev/null; then \
-		echo "$(RED)Poetry not found. Please install poetry first.$(RESET)"; \
+	@if ! command -v poetry >/dev/null 2>&1; then \
+		echo "$(RED)❌ poetry not found. Please install poetry first:$(RESET)"; \
+		echo "$(YELLOW)  curl -sSL https://install.python-poetry.org | python3 -$(RESET)"; \
 		exit 1; \
 	fi
-	@# Create a temporary script to handle the complex logic
-	@echo '#!/bin/bash' > .create_env_script.sh
-	@echo 'set -e' >> .create_env_script.sh
-	@echo 'BLUE="\033[36m"' >> .create_env_script.sh
-	@echo 'GREEN="\033[32m"' >> .create_env_script.sh
-	@echo 'YELLOW="\033[33m"' >> .create_env_script.sh
-	@echo 'RED="\033[31m"' >> .create_env_script.sh
-	@echo 'RESET="\033[0m"' >> .create_env_script.sh
-	@echo '' >> .create_env_script.sh
-	@echo '# Extract Python version from pyproject.toml' >> .create_env_script.sh
-	@echo 'PYTHON_BASE_VERSION=$$(grep "python = " pyproject.toml | cut -d"\"" -f2 | sed "s/\\^//" | sed "s/~//")' >> .create_env_script.sh
-	@echo 'echo "$${BLUE}Required Python base version: $$PYTHON_BASE_VERSION$${RESET}"' >> .create_env_script.sh
-	@echo '' >> .create_env_script.sh
-	@echo '# Check if we have a matching Python version installed' >> .create_env_script.sh
-	@echo 'PYTHON_VERSION=$$(pyenv versions --bare | grep "^$$PYTHON_BASE_VERSION" | sort -V | tail -1)' >> .create_env_script.sh
-	@echo '' >> .create_env_script.sh
-	@echo 'if [ -z "$$PYTHON_VERSION" ]; then' >> .create_env_script.sh
-	@echo '    echo "$${YELLOW}No local Python $$PYTHON_BASE_VERSION found. Finding latest available version...$${RESET}"' >> .create_env_script.sh
-	@echo '    PYTHON_VERSION=$$(pyenv install --list | grep -E "^\\s*$$PYTHON_BASE_VERSION\\.[0-9]+$$" | tail -1 | tr -d " ")' >> .create_env_script.sh
-	@echo '    if [ -z "$$PYTHON_VERSION" ]; then' >> .create_env_script.sh
-	@echo '        echo "$${RED}No Python $$PYTHON_BASE_VERSION version available$${RESET}"' >> .create_env_script.sh
-	@echo '        exit 1' >> .create_env_script.sh
-	@echo '    fi' >> .create_env_script.sh
-	@echo '    echo "$${YELLOW}Installing Python $$PYTHON_VERSION...$${RESET}"' >> .create_env_script.sh
-	@echo '    pyenv install $$PYTHON_VERSION' >> .create_env_script.sh
-	@echo '    echo "$${GREEN}Python $$PYTHON_VERSION installed successfully$${RESET}"' >> .create_env_script.sh
-	@echo 'else' >> .create_env_script.sh
-	@echo '    echo "$${GREEN}Using existing Python $$PYTHON_VERSION$${RESET}"' >> .create_env_script.sh
-	@echo 'fi' >> .create_env_script.sh
-	@echo '' >> .create_env_script.sh
-	@echo '# Set local Python version' >> .create_env_script.sh
-	@echo 'echo "$${BLUE}Setting local Python version to $$PYTHON_VERSION...$${RESET}"' >> .create_env_script.sh
-	@echo 'pyenv local $$PYTHON_VERSION' >> .create_env_script.sh
-	@echo '' >> .create_env_script.sh
-	@echo '# Remove existing virtual environment if it exists' >> .create_env_script.sh
-	@echo 'if [ -d ".venv" ]; then' >> .create_env_script.sh
-	@echo '    echo "$${YELLOW}Removing existing .venv directory...$${RESET}"' >> .create_env_script.sh
-	@echo '    rm -rf .venv' >> .create_env_script.sh
-	@echo 'fi' >> .create_env_script.sh
-	@echo '' >> .create_env_script.sh
-	@echo '# Configure Poetry' >> .create_env_script.sh
-	@echo 'echo "$${BLUE}Configuring Poetry...$${RESET}"' >> .create_env_script.sh
-	@echo 'poetry config virtualenvs.in-project true' >> .create_env_script.sh
-	@echo 'poetry env remove --all 2>/dev/null || true' >> .create_env_script.sh
-	@echo '' >> .create_env_script.sh
-	@echo '# Create virtual environment' >> .create_env_script.sh
-	@echo 'echo "$${BLUE}Creating virtual environment with Python $$PYTHON_VERSION...$${RESET}"' >> .create_env_script.sh
-	@echo 'poetry env use $$PYTHON_VERSION' >> .create_env_script.sh
-	@echo '' >> .create_env_script.sh
-	@echo '# Install dependencies' >> .create_env_script.sh
-	@echo 'echo "$${BLUE}Installing dependencies...$${RESET}"' >> .create_env_script.sh
-	@echo 'poetry install --no-root' >> .create_env_script.sh
-	@echo '' >> .create_env_script.sh
-	@echo '# Success message' >> .create_env_script.sh
-	@echo 'echo "$${GREEN}╔══════════════════════════════════════════════════════════════════════╗$${RESET}"' >> .create_env_script.sh
-	@echo 'echo "$${GREEN}║                    Environment created successfully!                 ║$${RESET}"' >> .create_env_script.sh
-	@echo 'echo "$${GREEN}╚══════════════════════════════════════════════════════════════════════╝$${RESET}"' >> .create_env_script.sh
-	@echo 'echo "$${YELLOW}Python version: $$PYTHON_VERSION$${RESET}"' >> .create_env_script.sh
-	@echo 'echo "$${YELLOW}Virtual environment: .venv$${RESET}"' >> .create_env_script.sh
-	@echo 'echo "$${YELLOW}To activate environment, run: poetry shell$${RESET}"' >> .create_env_script.sh
-	@chmod +x .create_env_script.sh
-	@./.create_env_script.sh
-	@rm -f .create_env_script.sh
+	@echo "$(BLUE)📋 Extracting Python version from pyproject.toml...$(RESET)"
+	@PYTHON_VERSION=$$(grep '^python = ' pyproject.toml | cut -d'"' -f2 | sed 's/\^//'); \
+	echo "$(BLUE)📋 Required Python: $$PYTHON_VERSION$(RESET)"
+	@if ! pyenv versions --bare | grep -q "^$$PYTHON_VERSION" >/dev/null 2>&1; then \
+		echo "$(YELLOW)📥 Installing Python $$PYTHON_VERSION...$(RESET)"; \
+		LATEST_VERSION=$$(pyenv install --list | grep -E "^\s*$$PYTHON_VERSION\.[0-9]+$$" | tail -1 | xargs); \
+		if [ -z "$$LATEST_VERSION" ]; then \
+			echo "$(RED)❌ Python $$PYTHON_VERSION not available$(RESET)"; \
+			exit 1; \
+		fi; \
+		pyenv install $$LATEST_VERSION >/dev/null 2>&1; \
+		PYTHON_VERSION=$$LATEST_VERSION; \
+	else \
+		PYTHON_VERSION=$$(pyenv versions --bare | grep "^$$PYTHON_VERSION" | sort -V | tail -1); \
+	fi; \
+	echo "$(GREEN)✅ Using Python: $$PYTHON_VERSION$(RESET)"
+	@pyenv local $$PYTHON_VERSION >/dev/null 2>&1
+	@poetry env use $$(pyenv which python) >/dev/null 2>&1
+	@echo "$(BLUE)📦 Installing dependencies...$(RESET)"
+	@poetry install --no-root >/dev/null 2>&1
+	@echo "$(GREEN)🎉 Environment ready!$(RESET)"
+	@echo "$(YELLOW)💡 Activate with: poetry shell$(RESET)"
+
 
 install: create-env
 
@@ -157,7 +118,7 @@ run: build ## Run complete stack (devstack + API + Celery)
 	@echo ""
 	@echo "$(YELLOW)🌐 Available Endpoints:$(RESET)"
 	@echo "$(BLUE)   API Swagger:$(RESET)     http://localhost:8000/api/docs/"
-	@echo "$(BLUE)   API Metrics:$(RESET)     http://localhost:8000/metrics/"
+	@echo "$(BLUE)   API Metrics:$(RESET)     http://localhost:8000/metrics"
 	@echo "$(BLUE)   RedisInsight:$(RESET)    http://localhost:5540/"
 	@echo "$(BLUE)   Grafana:$(RESET)         http://localhost:3000/ (admin/admin)"
 	@echo "$(BLUE)   Prometheus:$(RESET)      http://localhost:9090/"
